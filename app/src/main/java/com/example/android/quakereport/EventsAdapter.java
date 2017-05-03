@@ -71,9 +71,10 @@ public class EventsAdapter extends ArrayAdapter<Events> {
         // date
         // here we convert the unix timestamp to human readable
         TextView date = (TextView) listItemView.findViewById(R.id.events_date);
-        Date mDate = new Date((long)currentEvent.getmDate()*1000);
-//        date.setText(String.format(Locale.US, "%d", mDate));
-        date.setText(mDate.toString());
+        Date mDate = new Date((long)currentEvent.getmDate());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM DD, yyyy");
+        String dateToDisplay = dateFormat.format(mDate);
+        date.setText(dateToDisplay);
 
         return listItemView;
     }
