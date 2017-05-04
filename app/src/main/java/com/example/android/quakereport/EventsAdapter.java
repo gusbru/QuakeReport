@@ -62,12 +62,11 @@ public class EventsAdapter extends ArrayAdapter<Events> {
 
         // magnitude
         TextView magnitude = (TextView) listItemView.findViewById(R.id.events_magnitude);
-        magnitude.setText(String.format(Locale.UK, "%2.1f", currentEvent.getmMagnitude()));
+        magnitude.setText(String.format(Locale.US, "%2.1f", currentEvent.getmMagnitude()));
 
         // location and distance
         TextView distance = (TextView) listItemView.findViewById(R.id.events_distance);
         TextView location = (TextView) listItemView.findViewById(R.id.events_location);
-
 
         String separator = "of";
         String infoLocationAndDistance = currentEvent.getmPlace();
@@ -83,18 +82,18 @@ public class EventsAdapter extends ArrayAdapter<Events> {
 
 
         // date and time in Unix-time
-        Date mDate = new Date((long)currentEvent.getmDate());
+        Date mDate = new Date(currentEvent.getmDate());
 
         // convert date to human readable
         TextView date = (TextView) listItemView.findViewById(R.id.events_date);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM DD, yyyy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM DD, yyyy", Locale.US);
         String dateToDisplay = dateFormat.format(mDate);
         date.setText(dateToDisplay);
 
 
         // convert time to human readable
         TextView time = (TextView) listItemView.findViewById(R.id.events_time);
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm a");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm a", Locale.US);
         String timeToDisplay = timeFormat.format(mDate);
         time.setText(timeToDisplay);
 
