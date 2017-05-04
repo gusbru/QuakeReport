@@ -64,13 +64,17 @@ public class EarthquakeActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String url = earthquakes.get(position).getmUrl();
                 openWebPage(url);
-//                Toast.makeText(getApplicationContext(), url, Toast.LENGTH_SHORT).show();
-
             }
         });
 
     }
 
+    /**
+     * This method start an activity (web browser) to show more information about
+     * the earthquake.
+     *
+     * @param url the website address with more information about the earthquake
+     */
     private void openWebPage(String url){
         Uri webpage = Uri.parse(url);
         Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
