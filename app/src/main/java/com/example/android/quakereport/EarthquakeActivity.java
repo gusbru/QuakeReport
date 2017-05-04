@@ -15,10 +15,15 @@
  */
 package com.example.android.quakereport;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -34,17 +39,7 @@ public class EarthquakeActivity extends AppCompatActivity {
         setContentView(R.layout.earthquake_activity);
 
         // read the JSON file and extract the values
-        ArrayList<Events> earthquakes = QueryUtils.extractEarthquakes();
-
-        // Create a fake list of earthquake locations.
-//        ArrayList<Events> earthquakes = new ArrayList<>();
-//        earthquakes.add(new Events("San Francisco", 7.20, 1493395019));
-//        earthquakes.add(new Events("London", 6.1, 1493395019));
-//        earthquakes.add(new Events("Tokyo", 3.9 ,1493395019));
-//        earthquakes.add(new Events("Mexico City", 5.4 , 1493395019));
-//        earthquakes.add(new Events("Moscow", 2.8 , 1493395019));
-//        earthquakes.add(new Events("Rio de Janeiro", 4.9 , 1493395019));
-//        earthquakes.add(new Events("Paris", 1.6 , 1493395019));
+        final ArrayList<Events> earthquakes = QueryUtils.extractEarthquakes();
 
 
         // Find a reference to the {@link ListView} in the layout
@@ -61,5 +56,27 @@ public class EarthquakeActivity extends AppCompatActivity {
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
         earthquakeListView.setAdapter(adapter);
+
+
+        // set action on click
+        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String url = earthquakes.get(position).getmUrl();
+                openWebPage(url);
+//                Toast.makeText(getApplicationContext(), url, Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
     }
+
+    private void openWebPage(String url){
+        Uri webpage = Uri.parse(url);
+        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
 }
