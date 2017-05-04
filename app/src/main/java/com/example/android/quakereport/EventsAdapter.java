@@ -64,9 +64,23 @@ public class EventsAdapter extends ArrayAdapter<Events> {
         TextView magnitude = (TextView) listItemView.findViewById(R.id.events_magnitude);
         magnitude.setText(String.format(Locale.UK, "%2.1f", currentEvent.getmMagnitude()));
 
-        // location
+        // location and distance
+        TextView distance = (TextView) listItemView.findViewById(R.id.events_distance);
         TextView location = (TextView) listItemView.findViewById(R.id.events_location);
-        location.setText(currentEvent.getmPlace());
+
+
+        String separator = "of";
+        String infoLocationAndDistance = currentEvent.getmPlace();
+        if (infoLocationAndDistance.contains(separator)) {
+            int start = infoLocationAndDistance.indexOf(separator) + separator.length();
+            int end   = infoLocationAndDistance.length();
+            distance.setText(infoLocationAndDistance.substring(0, start));
+            location.setText(infoLocationAndDistance.substring(start + 1, end));
+        } else {
+            distance.setText("Near of");
+            location.setText(infoLocationAndDistance);
+        }
+
 
         // date and time in Unix-time
         Date mDate = new Date((long)currentEvent.getmDate());
