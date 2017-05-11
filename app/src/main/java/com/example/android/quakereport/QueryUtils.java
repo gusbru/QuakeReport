@@ -6,7 +6,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+
+import static com.example.android.quakereport.EarthquakeActivity.LOG_TAG;
 
 /**
  * Created by gusbru on 5/3/17.
@@ -35,7 +45,108 @@ public final class QueryUtils {
     private QueryUtils() {
     }
 
-    public static ArrayList<Events> extractEarthquakes() {
+    /**
+     *
+     * @param urlString
+     * @return
+     */
+    public static String fetchData(String urlString) {
+        // Construct the URL
+        URL url = null;
+        url = QueryUtils.constructURL(urlString);
+        if (url == null) {
+            return null;
+        }
+
+        String jsonResponse = null;
+        try {
+            jsonResponse = makeHttpRequest(url);
+        } catch (IOException e) {
+           Log.e(LOG_TAG, "Error trying to make HTTP request ", e);
+        }
+
+        return jsonResponse;
+
+    }
+
+    private static URL constructURL(String address) {
+        URL url = null;
+        try {
+            url = new URL(address);
+        } catch (MalformedURLException e) {
+            Log.e(LOG_TAG, "Malformed URL ", e);
+        }
+        return url;
+    }
+
+    private static String makeHttpRequest(URL url) throws IOException {
+        String jsonResponse = "";
+
+        // if a null url is passed, return early.
+        if (url == null) {
+            return jsonResponse;
+        }
+
+        HttpURLConnection urlConnection = null;
+        InputStream inputStream = null;
+
+        //
+        try {
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setReadTimeout(10000);
+            urlConnection.setConnectTimeout(10000);
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+
+            // acquiring the data
+            if (urlConnection.getResponseCode() == 200) {
+                inputStream = urlConnection.getInputStream();
+                jsonResponse = readFromStream(inputStream);
+            } else {
+                Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
+            }
+
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Error connecting to server", e);
+        } finally {
+            // close connection
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+
+            // close inputStream
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        }
+
+        return jsonResponse;
+    }
+
+    private static String readFromStream(InputStream inputStream) throws IOException {
+        StringBuilder output = new StringBuilder();
+
+        if (inputStream != null) {
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            String line = null;
+            try {
+                line = bufferedReader.readLine();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Cannot read the buffer", e);
+            }
+
+            while (line != null) {
+                output.append(line);
+                line = bufferedReader.readLine();
+            }
+        }
+
+        return output.toString();
+    }
+
+    public static ArrayList<Events> extractEarthquakes(String earthquakesJSON) {
 
         // create an empty ArrayList that we can start adding earthquakes to
         ArrayList<Events> earthquakes = new ArrayList<>();
@@ -43,7 +154,8 @@ public final class QueryUtils {
 
         try {
             //create a JSON object
-            JSONObject reader = new JSONObject(SAMPLE_JSON_RESPONSE);
+//            JSONObject reader = new JSONObject(SAMPLE_JSON_RESPONSE);
+            JSONObject reader = new JSONObject(earthquakesJSON);
 
             JSONArray features = reader.getJSONArray("features");
 

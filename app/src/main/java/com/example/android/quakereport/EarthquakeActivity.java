@@ -17,15 +17,23 @@ package com.example.android.quakereport;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.android.quakereport.QueryUtils.extractEarthquakes;
 
@@ -33,15 +41,53 @@ public class EarthquakeActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
 
+//    public static final String URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
+    public static final String URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=5&limit=10";
+//    public static final String URL = "fdsfaf";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
 
+
+
         // read the JSON file and extract the values
-        final ArrayList<Events> earthquakes = QueryUtils.extractEarthquakes();
+//        final ArrayList<Events> earthquakes = QueryUtils.extractEarthquakes();
+
+        // get the information from network
+        RequestFromServer task = new RequestFromServer();
+        task.execute(URL);
 
 
+
+
+    }
+
+
+    private class RequestFromServer extends AsyncTask<String, Void, ArrayList<Events>> {
+        @Override
+        protected ArrayList<Events> doInBackground(String... urls) {
+            if (urls.length < 1 || urls[0] == null) {
+                return null;
+            }
+
+            String earthquakesJSON = QueryUtils.fetchData(urls[0]);
+            ArrayList<Events> earthquakes = QueryUtils.extractEarthquakes(earthquakesJSON);
+
+            return earthquakes;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Events> eventses) {
+
+            updateIU(eventses);
+
+        }
+    }
+
+
+    private void updateIU(ArrayList<Events> eventses) {
         // Find a reference to the {@link ListView} in the layout
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
 
@@ -51,7 +97,7 @@ public class EarthquakeActivity extends AppCompatActivity {
         //       this, android.R.layout.simple_list_item_1, earthquakes);
 
         // CUSTOM ADAPTER
-        final EventsAdapter adapter = new EventsAdapter(this, earthquakes);
+        final EventsAdapter adapter = new EventsAdapter(EarthquakeActivity.this, eventses);
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
@@ -73,8 +119,8 @@ public class EarthquakeActivity extends AppCompatActivity {
                 openWebPage(url);
             }
         });
-
     }
+
 
     /**
      * This method start an activity (web browser) to show more information about
