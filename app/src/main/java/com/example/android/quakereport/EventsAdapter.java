@@ -25,9 +25,8 @@ import java.util.Locale;
 public class EventsAdapter extends ArrayAdapter<Events> {
 
     /**
-     *
      * @param context activity context
-     * @param event ArrayList element with the earthquake event
+     * @param event   ArrayList element with the earthquake event
      */
     public EventsAdapter(Activity context, ArrayList<Events> event) {
         //
@@ -36,7 +35,6 @@ public class EventsAdapter extends ArrayAdapter<Events> {
 
 
     /**
-     *
      * @param position
      * @param convertView
      * @param parent
@@ -47,7 +45,7 @@ public class EventsAdapter extends ArrayAdapter<Events> {
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         // check if the existing view is being reused, otherwise inflate the view
         View listItemView = convertView;
-        if(listItemView == null) {
+        if (listItemView == null) {
             listItemView = LayoutInflater.from(getContext()).inflate(
                     R.layout.events_view,
                     parent,
@@ -84,7 +82,7 @@ public class EventsAdapter extends ArrayAdapter<Events> {
         String infoLocationAndDistance = currentEvent.getmPlace();
         if (infoLocationAndDistance.contains(separator)) {
             int start = infoLocationAndDistance.indexOf(separator) + separator.length();
-            int end   = infoLocationAndDistance.length();
+            int end = infoLocationAndDistance.length();
             distance.setText(infoLocationAndDistance.substring(0, start));
             location.setText(infoLocationAndDistance.substring(start + 1, end));
         } else {
@@ -148,7 +146,7 @@ public class EventsAdapter extends ArrayAdapter<Events> {
                 magnitudeColor = ContextCompat.getColor(getContext(), R.color.magnitude10plus);
         }
 
-        return  magnitudeColor;
+        return magnitudeColor;
     }
 
 }

@@ -48,10 +48,10 @@ public class EarthquakeActivity extends AppCompatActivity {
         // ORIGINAL ADAPTER
         // Create a new {@link ArrayAdapter} of earthquakes
         //ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-         //       this, android.R.layout.simple_list_item_1, earthquakes);
+        //       this, android.R.layout.simple_list_item_1, earthquakes);
 
         // CUSTOM ADAPTER
-        EventsAdapter adapter = new EventsAdapter(this, earthquakes);
+        final EventsAdapter adapter = new EventsAdapter(this, earthquakes);
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
@@ -62,7 +62,14 @@ public class EarthquakeActivity extends AppCompatActivity {
         earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String url = earthquakes.get(position).getmUrl();
+                // Way #1 to get the url
+//                String url = earthquakes.get(position).getmUrl();
+
+                // Way #2 to get the url
+                Events currentEvent = adapter.getItem(position);
+                String url = currentEvent.getmUrl();
+
+                // call the method to open the url with intent
                 openWebPage(url);
             }
         });
@@ -75,7 +82,7 @@ public class EarthquakeActivity extends AppCompatActivity {
      *
      * @param url the website address with more information about the earthquake
      */
-    private void openWebPage(String url){
+    private void openWebPage(String url) {
         Uri webpage = Uri.parse(url);
         Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
         if (intent.resolveActivity(getPackageManager()) != null) {
