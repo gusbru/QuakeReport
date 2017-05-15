@@ -15,10 +15,14 @@
  */
 package com.example.android.quakereport;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.app.LoaderManager;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -37,11 +41,11 @@ import java.util.List;
 
 import static com.example.android.quakereport.QueryUtils.extractEarthquakes;
 
-public class EarthquakeActivity extends AppCompatActivity {
+public class EarthquakeActivity extends AppCompatActivity implements LoaderCallbacks<ArrayList<Events>>{
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
 
-//    public static final String URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
+    //    public static final String URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
     public static final String URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=5&limit=10";
 //    public static final String URL = "fdsfaf";
 
@@ -51,19 +55,86 @@ public class EarthquakeActivity extends AppCompatActivity {
         setContentView(R.layout.earthquake_activity);
 
 
-
         // read the JSON file and extract the values
 //        final ArrayList<Events> earthquakes = QueryUtils.extractEarthquakes();
 
-        // get the information from network
-        RequestFromServer task = new RequestFromServer();
-        task.execute(URL);
+        // get the information from network using AsyncTask
+        //RequestFromServer task = new RequestFromServer();
+        //task.execute(URL);
 
-
+        // get the information from network using Loader
+        LoaderManager loaderManager = getLoaderManager();
+        loaderManager.initLoader(0, null, this);
 
 
     }
 
+    @Override
+    public Loader<ArrayList<Events>> onCreateLoader(int id, Bundle args) {
+        return new EarthquakeLoader(EarthquakeActivity.this, URL);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ArrayList<Events>> loader, ArrayList<Events> data) {
+        updateIU(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<ArrayList<Events>> loader) {
+
+    }
+
+    /**
+     *
+     * @param eventses
+     */
+    private void updateIU(ArrayList<Events> eventses) {
+        // Find a reference to the {@link ListView} in the layout
+        ListView earthquakeListView = (ListView) findViewById(R.id.list);
+
+        // ORIGINAL ADAPTER
+        // Create a new {@link ArrayAdapter} of earthquakes
+        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+        //       this, android.R.layout.simple_list_item_1, earthquakes);
+
+        // CUSTOM ADAPTER
+        final EventsAdapter adapter = new EventsAdapter(EarthquakeActivity.this, eventses);
+
+        // Set the adapter on the {@link ListView}
+        // so the list can be populated in the user interface
+        earthquakeListView.setAdapter(adapter);
+
+
+        // set action on click - Open the browser with the event site
+        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Way #1 to get the url
+//                String url = earthquakes.get(position).getmUrl();
+
+                // Way #2 to get the url
+                Events currentEvent = adapter.getItem(position);
+                String url = currentEvent.getmUrl();
+
+                // call the method to open the url with intent
+                openWebPage(url);
+            }
+        });
+    }
+
+    /**
+     * This method start an activity (web browser) to show more information about
+     * the earthquake.
+     *
+     * @param url the website address with more information about the earthquake
+     */
+    private void openWebPage(String url) {
+        Uri webpage = Uri.parse(url);
+        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
 
     private class RequestFromServer extends AsyncTask<String, Void, ArrayList<Events>> {
         @Override
@@ -87,53 +158,5 @@ public class EarthquakeActivity extends AppCompatActivity {
     }
 
 
-    private void updateIU(ArrayList<Events> eventses) {
-        // Find a reference to the {@link ListView} in the layout
-        ListView earthquakeListView = (ListView) findViewById(R.id.list);
-
-        // ORIGINAL ADAPTER
-        // Create a new {@link ArrayAdapter} of earthquakes
-        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-        //       this, android.R.layout.simple_list_item_1, earthquakes);
-
-        // CUSTOM ADAPTER
-        final EventsAdapter adapter = new EventsAdapter(EarthquakeActivity.this, eventses);
-
-        // Set the adapter on the {@link ListView}
-        // so the list can be populated in the user interface
-        earthquakeListView.setAdapter(adapter);
-
-
-        // set action on click
-        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Way #1 to get the url
-//                String url = earthquakes.get(position).getmUrl();
-
-                // Way #2 to get the url
-                Events currentEvent = adapter.getItem(position);
-                String url = currentEvent.getmUrl();
-
-                // call the method to open the url with intent
-                openWebPage(url);
-            }
-        });
-    }
-
-
-    /**
-     * This method start an activity (web browser) to show more information about
-     * the earthquake.
-     *
-     * @param url the website address with more information about the earthquake
-     */
-    private void openWebPage(String url) {
-        Uri webpage = Uri.parse(url);
-        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
 
 }
