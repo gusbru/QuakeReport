@@ -35,6 +35,12 @@
                 <data android:scheme="https" android:host="earthquake.usgs.gov/earthquakes" />
             </intent-filter>
         </activity>
+        <activity android:name=".SettingsActivity"
+            android:label="@string/settings_title">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".EarthquakeActivity"/>
+        </activity>
     </application>
 
 </manifest>
