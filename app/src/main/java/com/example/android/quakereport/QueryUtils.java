@@ -50,6 +50,14 @@ public final class QueryUtils {
      * @return
      */
     public static String fetchData(String urlString) {
+        // this try block just stall the code for 2 seconds
+        // in order to be able to see the progress bar
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         // Construct the URL
         URL url = null;
         url = QueryUtils.constructURL(urlString);
@@ -57,6 +65,7 @@ public final class QueryUtils {
             return null;
         }
 
+        // Request from internet which returns a JSON string
         String jsonResponse = null;
         try {
             jsonResponse = makeHttpRequest(url);

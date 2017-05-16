@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +43,7 @@ import java.util.List;
 
 import static com.example.android.quakereport.QueryUtils.extractEarthquakes;
 
-public class EarthquakeActivity extends AppCompatActivity implements LoaderCallbacks<ArrayList<Events>>{
+public class EarthquakeActivity extends AppCompatActivity implements LoaderCallbacks<ArrayList<Events>> {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
 
@@ -55,12 +56,13 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
 
+        // set the text for empty display.
         ListView emptyListView = (ListView) findViewById(R.id.list);
         emptyListView.setEmptyView(findViewById(R.id.empty_view));
 
 
         // read the JSON file and extract the values
-//        final ArrayList<Events> earthquakes = QueryUtils.extractEarthquakes();
+        //final ArrayList<Events> earthquakes = QueryUtils.extractEarthquakes();
 
         // get the information from network using AsyncTask
         //RequestFromServer task = new RequestFromServer();
@@ -69,7 +71,6 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
         // get the information from network using Loader
         LoaderManager loaderManager = getLoaderManager();
         loaderManager.initLoader(0, null, this);
-
 
 
     }
@@ -81,8 +82,13 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
 
     @Override
     public void onLoadFinished(Loader<ArrayList<Events>> loader, ArrayList<Events> data) {
+        // setup the empty text to display
         TextView emptyText = (TextView) findViewById(R.id.empty_view);
-        emptyText.setText("No display to show");
+        emptyText.setText(R.string.empty_string);
+
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.GONE);
+
         updateIU(data);
     }
 
@@ -91,7 +97,6 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
     }
 
     /**
-     *
      * @param eventses
      */
     private void updateIU(ArrayList<Events> eventses) {
@@ -103,29 +108,32 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
         //ArrayAdapter<String> adapter = new ArrayAdapter<String>(
         //       this, android.R.layout.simple_list_item_1, earthquakes);
 
-        // CUSTOM ADAPTER
-        final EventsAdapter adapter = new EventsAdapter(EarthquakeActivity.this, eventses);
+        if (eventses != null && !eventses.isEmpty()) {
+            // CUSTOM ADAPTER
+            final EventsAdapter adapter = new EventsAdapter(EarthquakeActivity.this, eventses);
 
-        // Set the adapter on the {@link ListView}
-        // so the list can be populated in the user interface
-        earthquakeListView.setAdapter(adapter);
+            // Set the adapter on the {@link ListView}
+            // so the list can be populated in the user interface
+            earthquakeListView.setAdapter(adapter);
 
 
-        // set action on click - Open the browser with the event site
-        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Way #1 to get the url
-//                String url = earthquakes.get(position).getmUrl();
+            // set action on click - Open the browser with the event site
+            earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    // Way #1 - get the url
+                    //String url = earthquakes.get(position).getmUrl();
 
-                // Way #2 to get the url
-                Events currentEvent = adapter.getItem(position);
-                String url = currentEvent.getmUrl();
+                    // Way #2 - get the url
+                    Events currentEvent = adapter.getItem(position);
+                    String url = currentEvent.getmUrl();
 
-                // call the method to open the url with intent
-                openWebPage(url);
-            }
-        });
+                    // call the method to open the url with intent
+                    openWebPage(url);
+                }
+            });
+        }
+
     }
 
     /**
@@ -142,6 +150,9 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
         }
     }
 
+    /**
+     *
+     */
     private class RequestFromServer extends AsyncTask<String, Void, ArrayList<Events>> {
         @Override
         protected ArrayList<Events> doInBackground(String... urls) {
@@ -162,7 +173,6 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
 
         }
     }
-
 
 
 }
