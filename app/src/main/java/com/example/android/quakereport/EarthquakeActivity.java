@@ -17,6 +17,8 @@ package com.example.android.quakereport;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,31 +48,49 @@ import static com.example.android.quakereport.QueryUtils.extractEarthquakes;
 public class EarthquakeActivity extends AppCompatActivity implements LoaderCallbacks<ArrayList<Events>> {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
-
     //    public static final String URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
     public static final String URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=5&limit=50";
-//    public static final String URL = "fdsfaf";
+
+    /**
+     * TextView that is displayed when the list is empty
+     */
+    private TextView emptyText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
 
-        // set the text for empty display.
-        ListView emptyListView = (ListView) findViewById(R.id.list);
-        emptyListView.setEmptyView(findViewById(R.id.empty_view));
+        //Check the network connectivity
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+
+        if (isConnected) {
+            // set the text for empty display.
+            ListView emptyListView = (ListView) findViewById(R.id.list);
+            emptyListView.setEmptyView(findViewById(R.id.empty_view));
 
 
-        // read the JSON file and extract the values
-        //final ArrayList<Events> earthquakes = QueryUtils.extractEarthquakes();
+            // read the JSON file and extract the values
+            //final ArrayList<Events> earthquakes = QueryUtils.extractEarthquakes();
 
-        // get the information from network using AsyncTask
-        //RequestFromServer task = new RequestFromServer();
-        //task.execute(URL);
+            // get the information from network using AsyncTask
+            //RequestFromServer task = new RequestFromServer();
+            //task.execute(URL);
 
-        // get the information from network using Loader
-        LoaderManager loaderManager = getLoaderManager();
-        loaderManager.initLoader(0, null, this);
+            // get the information from network using Loader
+            LoaderManager loaderManager = getLoaderManager();
+            loaderManager.initLoader(0, null, this);
+        } else {
+            // Hide the progress bar
+            ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+            progressBar.setVisibility(View.GONE);
+
+            // setup the text for no internet connection
+            emptyText = (TextView) findViewById(R.id.empty_view);
+            emptyText.setText(R.string.no_internet_connection);
+        }
 
 
     }
@@ -83,7 +103,7 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
     @Override
     public void onLoadFinished(Loader<ArrayList<Events>> loader, ArrayList<Events> data) {
         // setup the empty text to display
-        TextView emptyText = (TextView) findViewById(R.id.empty_view);
+        emptyText = (TextView) findViewById(R.id.empty_view);
         emptyText.setText(R.string.empty_string);
 
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
