@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -46,13 +47,16 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
 
     //    public static final String URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
-    public static final String URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=5&limit=10";
+    public static final String URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=5&limit=50";
 //    public static final String URL = "fdsfaf";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
+
+        ListView emptyListView = (ListView) findViewById(R.id.list);
+        emptyListView.setEmptyView(findViewById(R.id.empty_view));
 
 
         // read the JSON file and extract the values
@@ -67,6 +71,7 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
         loaderManager.initLoader(0, null, this);
 
 
+
     }
 
     @Override
@@ -76,12 +81,13 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
 
     @Override
     public void onLoadFinished(Loader<ArrayList<Events>> loader, ArrayList<Events> data) {
+        TextView emptyText = (TextView) findViewById(R.id.empty_view);
+        emptyText.setText("No display to show");
         updateIU(data);
     }
 
     @Override
     public void onLoaderReset(Loader<ArrayList<Events>> loader) {
-
     }
 
     /**
